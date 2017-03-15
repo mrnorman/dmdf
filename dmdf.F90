@@ -16,11 +16,27 @@ module dmdf
   
   interface dmdf_attr
     module procedure dmdf_attr_real4
+    module procedure dmdf_attr_real8
+    module procedure dmdf_attr_int4
+    module procedure dmdf_attr_int8
+    module procedure dmdf_attr_char
   end interface
   
   interface dmdf_write
-    module procedure dmdf_write_real4_0d
+    module procedure dmdf_write_real4_scalar
+    module procedure dmdf_write_real8_scalar
+    module procedure dmdf_write_int4_scalar
+    module procedure dmdf_write_int8_scalar
+
     module procedure dmdf_write_real4_1d
+    module procedure dmdf_write_real8_1d
+    module procedure dmdf_write_int4_1d
+    module procedure dmdf_write_int8_1d
+
+    module procedure dmdf_write_real4_2d
+    module procedure dmdf_write_real8_2d
+    module procedure dmdf_write_int4_2d
+    module procedure dmdf_write_int8_2d
   end interface
 
   public :: dmdf_attr
@@ -30,24 +46,96 @@ module dmdf
 contains
 
 
-  subroutine dmdf_attr_real4(val,rank,fprefix,aname,first,last)
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !! GLOBAL ATTRIBUTE ROUTINES
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  subroutine dmdf_attr_real4(val,rank,fprefix,aname)
     implicit none
     real(4)         , intent(in) :: val
     integer         , intent(in) :: rank
     character(len=*), intent(in) :: fprefix
     character(len=*), intent(in) :: aname
-    logical         , intent(in) :: first
-    logical         , intent(in) :: last
     integer :: ierr
     success = .true.
-    call procure_fileid(first,rank,fprefix,ncid)             ; _RET_IF_ERR
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
     ierr = nf90_redef(ncid)
     _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
-    call close_file(last,ncid)                               ; _RET_IF_ERR
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
   endsubroutine dmdf_attr_real4
 
 
-  subroutine dmdf_write_real4_0d(dat,rank,fprefix,vname,first,last)
+  subroutine dmdf_attr_real8(val,rank,fprefix,aname)
+    implicit none
+    real(8)         , intent(in) :: val
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: aname
+    integer :: ierr
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_attr_real8
+
+
+  subroutine dmdf_attr_int4(val,rank,fprefix,aname)
+    implicit none
+    integer(4)      , intent(in) :: val
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: aname
+    integer :: ierr
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_attr_int4
+
+
+  subroutine dmdf_attr_int8(val,rank,fprefix,aname)
+    implicit none
+    integer(8)      , intent(in) :: val
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: aname
+    integer :: ierr
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_attr_int8
+
+
+  subroutine dmdf_attr_char(val,rank,fprefix,aname)
+    implicit none
+    character(len=*), intent(in) :: val
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: aname
+    integer :: ierr
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_attr_char
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !! SCALAR VARIABLE ROUTINES
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  subroutine dmdf_write_real4_scalar(dat,rank,fprefix,vname,first,last)
     implicit none
     integer, parameter :: ndims = 1
     real(4)         , intent(in) :: dat
@@ -66,9 +154,88 @@ contains
     call procure_varid(ndims,ncid,vname,dimids,NF90_FLOAT,varid)         ; _RET_IF_ERR
     call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
     ierr = nf90_enddef(ncid)
-    _NCERR( nf90_put_var(ncid,varid,(/dat/),(/unlim_len/),(/1/)) )
+    _NCERR( nf90_put_var(ncid,varid,(/dat/),start,count) )
     call close_file(last,ncid)                                           ; _RET_IF_ERR
-  end subroutine dmdf_write_real4_0d
+  end subroutine dmdf_write_real4_scalar
+
+
+  subroutine dmdf_write_real8_scalar(dat,rank,fprefix,vname,first,last)
+    implicit none
+    integer, parameter :: ndims = 1
+    real(8)         , intent(in) :: dat
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimid_unlim(ndims,ncid,dimids,unlim_len)                ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_DOUBLE,varid)        ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,(/dat/),start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_real8_scalar
+
+
+  subroutine dmdf_write_int4_scalar(dat,rank,fprefix,vname,first,last)
+    implicit none
+    integer, parameter :: ndims = 1
+    integer(4)      , intent(in) :: dat
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimid_unlim(ndims,ncid,dimids,unlim_len)                ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_INT,varid)           ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,(/dat/),start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_int4_scalar
+
+
+  subroutine dmdf_write_int8_scalar(dat,rank,fprefix,vname,first,last)
+    implicit none
+    integer, parameter :: ndims = 1
+    integer(8)      , intent(in) :: dat
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimid_unlim(ndims,ncid,dimids,unlim_len)                ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_INT64,varid)         ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,(/dat/),start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_int8_scalar
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !! ARRAY VARIABLE ROUTINES
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
   subroutine dmdf_write_real4_1d(dat,rank,fprefix,vname,dnames,first,last)
@@ -95,6 +262,195 @@ contains
     _NCERR( nf90_put_var(ncid,varid,dat,start,count) )
     call close_file(last,ncid)                                           ; _RET_IF_ERR
   end subroutine dmdf_write_real4_1d
+
+
+  subroutine dmdf_write_real8_1d(dat,rank,fprefix,vname,dnames,first,last)
+    implicit none
+    integer, parameter :: ndims = 2
+    real(8)         , intent(in) :: dat(:)
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    character(len=*), intent(in) :: dnames(ndims-1)
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(1:ndims-1) = shape(dat)
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimids(ndims,ncid,dnames,dsizes,dimids,unlim_len)       ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_DOUBLE,varid)        ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,dat,start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_real8_1d
+
+
+  subroutine dmdf_write_int4_1d(dat,rank,fprefix,vname,dnames,first,last)
+    implicit none
+    integer, parameter :: ndims = 2
+    integer(4)      , intent(in) :: dat(:)
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    character(len=*), intent(in) :: dnames(ndims-1)
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(1:ndims-1) = shape(dat)
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimids(ndims,ncid,dnames,dsizes,dimids,unlim_len)       ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_INT,varid)           ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,dat,start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_int4_1d
+
+
+  subroutine dmdf_write_int8_1d(dat,rank,fprefix,vname,dnames,first,last)
+    implicit none
+    integer, parameter :: ndims = 2
+    integer(8)      , intent(in) :: dat(:)
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    character(len=*), intent(in) :: dnames(ndims-1)
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(1:ndims-1) = shape(dat)
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimids(ndims,ncid,dnames,dsizes,dimids,unlim_len)       ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_INT64,varid)         ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,dat,start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_int8_1d
+
+
+  subroutine dmdf_write_real4_2d(dat,rank,fprefix,vname,dnames,first,last)
+    implicit none
+    integer, parameter :: ndims = 3
+    real(4)         , intent(in) :: dat(:,:)
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    character(len=*), intent(in) :: dnames(ndims-1)
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(1:ndims-1) = shape(dat)
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimids(ndims,ncid,dnames,dsizes,dimids,unlim_len)       ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_FLOAT,varid)         ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,dat,start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_real4_2d
+
+
+  subroutine dmdf_write_real8_2d(dat,rank,fprefix,vname,dnames,first,last)
+    implicit none
+    integer, parameter :: ndims = 3
+    real(8)         , intent(in) :: dat(:,:)
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    character(len=*), intent(in) :: dnames(ndims-1)
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(1:ndims-1) = shape(dat)
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimids(ndims,ncid,dnames,dsizes,dimids,unlim_len)       ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_DOUBLE,varid)        ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,dat,start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_real8_2d
+
+
+  subroutine dmdf_write_int4_2d(dat,rank,fprefix,vname,dnames,first,last)
+    implicit none
+    integer, parameter :: ndims = 3
+    integer(4)      , intent(in) :: dat(:,:)
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    character(len=*), intent(in) :: dnames(ndims-1)
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(1:ndims-1) = shape(dat)
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimids(ndims,ncid,dnames,dsizes,dimids,unlim_len)       ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_INT,varid)           ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,dat,start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_int4_2d
+
+
+  subroutine dmdf_write_int8_2d(dat,rank,fprefix,vname,dnames,first,last)
+    implicit none
+    integer, parameter :: ndims = 3
+    integer(8)      , intent(in) :: dat(:,:)
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    character(len=*), intent(in) :: dnames(ndims-1)
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(1:ndims-1) = shape(dat)
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimids(ndims,ncid,dnames,dsizes,dimids,unlim_len)       ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_INT64,varid)         ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,dat,start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_int8_2d
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !! REUSED INTERNAL ROUTINES
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
   subroutine close_file(last,ncid)
@@ -206,10 +562,9 @@ contains
     integer         , intent(in   ) :: ncid
     integer         , intent(  out) :: dimids(ndims)
     integer         , intent(  out) :: unlim_len
-    integer :: i, ierr
-    integer                       :: len
+    integer :: i, ierr, len
     !If the dimension is defined already, get the dimension id
-    ierr = nf90_inq_dimid( ncid , 'unlim', dimids(i) )
+    ierr = nf90_inq_dimid( ncid , 'unlim', dimids(ndims) )
     if     (ierr == NF90_EBADDIM) then
       !If the dimension is not defined, then define it, and set unlim_len to zero
       _NCERR( nf90_def_dim( ncid , 'unlim' , NF90_UNLIMITED , dimids(ndims) ) )
@@ -240,9 +595,9 @@ contains
       !If the file exists, open for writing. Otherwise, create
       inquire(file=trim(fname), exist=file_exists) 
       if (file_exists) then
-        _NCERR( nf90_open  ( trim(fname) , NF90_WRITE        , ncid ) )
+        _NCERR( nf90_open  ( trim(fname) , NF90_WRITE , ncid ) )
       else
-        _NCERR( nf90_create( trim(fname) , NF90_64BIT_OFFSET , ncid ) )
+        _NCERR( nf90_create( trim(fname) , NF90_HDF5  , ncid ) )
       endif
     endif
   end subroutine procure_fileid
