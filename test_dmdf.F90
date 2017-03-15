@@ -18,10 +18,6 @@ program test_dmdf
   call mpi_init(ierr)
   call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
 
-  write(*,*) 'initializing'
-
-  call dmdf_init(rank,MPI_COMM_WORLD,'testing',16,1)
-
   write(*,*) 'beginning first transfer'
 
   real4_1d = 0.
@@ -34,16 +30,9 @@ program test_dmdf
   real8_3d = 7.
   real8_4d = 8.
   real8_5d = 9.
-  call dmdf_write(real4_1d,'real4_1d',(/'x1'                    /),.true. ) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real4_2d,'real4_2d',(/'x1','x2'               /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real4_3d,'real4_3d',(/'x1','x2','x3'          /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real4_4d,'real4_4d',(/'x1','x2','x3','x4'     /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real4_5d,'real4_5d',(/'x1','x2','x3','x4','x5'/),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real8_1d,'real8_1d',(/'x6'                    /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real8_2d,'real8_2d',(/'x6','x2'               /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real8_3d,'real8_3d',(/'x6','x2','x3'          /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real8_4d,'real8_4d',(/'x6','x2','x3','x4'     /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real8_5d,'real8_5d',(/'x6','x2','x3','x4','x5'/),.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_attr (real4_1d(1),rank,'testing','att_real4'         ,.true. ,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_write(real4_1d(1),rank,'testing','real4_0d'          ,.false.,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_write(real4_1d   ,rank,'testing','real4_1d' ,(/'x1'/),.false.,.true. ) ; if (.not. success) write(*,*) error_string
 
   write(*,*) 'beginning second transfer'
 
@@ -57,18 +46,9 @@ program test_dmdf
   real8_3d = 30.
   real8_4d = 40.
   real8_5d = 50.
-  !call dmdf_write(real4_1d,'real4_1d',(/'x1'                    /),.true. ) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real4_2d,'real4_2d',(/'x1','x2'               /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real4_3d,'real4_3d',(/'x1','x2','x3'          /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real4_4d,'real4_4d',(/'x1','x2','x3','x4'     /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real4_5d,'real4_5d',(/'x1','x2','x3','x4','x5'/),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real8_1d,'real8_1d',(/'x6'                    /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real8_2d,'real8_2d',(/'x6','x2'               /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real8_3d,'real8_3d',(/'x6','x2','x3'          /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real8_4d,'real8_4d',(/'x6','x2','x3','x4'     /),.false.) ; if (.not. success) write(*,*) error_string
-  !call dmdf_write(real8_5d,'real8_5d',(/'x6','x2','x3','x4','x5'/),.false.) ; if (.not. success) write(*,*) error_string
-
-  call dmdf_final()
+  call dmdf_attr (real4_1d(1),rank,'testing','att_real4'         ,.true. ,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_write(real4_1d(1),rank,'testing','real4_0d'          ,.false.,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_write(real4_1d   ,rank,'testing','real4_1d' ,(/'x1'/),.false.,.true. ) ; if (.not. success) write(*,*) error_string
 
   write(*,*) 'finished'
 
