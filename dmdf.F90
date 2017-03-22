@@ -39,7 +39,11 @@ module dmdf
     module procedure dmdf_write_int8_2d
   end interface
 
+  !dmdf_attr(val,rank,fprefix,aname)
   public :: dmdf_attr
+
+  !dmdf_write(dat,rank,fprefix,vname       ,first,last)
+  !dmdf_write(dat,rank,fprefix,vname,dnames,first,last)
   public :: dmdf_write
 
 
