@@ -14,13 +14,22 @@ module dmdf
   character(len=1024), public :: error_string
   logical            , public :: success
   
-  interface dmdf_attr
-    module procedure dmdf_attr_real4
-    module procedure dmdf_attr_real8
-    module procedure dmdf_attr_int4
-    module procedure dmdf_attr_int8
-    module procedure dmdf_attr_char
-    module procedure dmdf_attr_log
+  interface dmdf_write_attr
+    module procedure dmdf_write_attr_real4
+    module procedure dmdf_write_attr_real8
+    module procedure dmdf_write_attr_int4
+    module procedure dmdf_write_attr_int8
+    module procedure dmdf_write_attr_char
+    module procedure dmdf_write_attr_log
+  end interface
+  
+  interface dmdf_read_attr
+    module procedure dmdf_read_attr_real4
+    module procedure dmdf_read_attr_real8
+    module procedure dmdf_read_attr_int4
+    module procedure dmdf_read_attr_int8
+    module procedure dmdf_read_attr_char
+    module procedure dmdf_read_attr_log
   end interface
   
   interface dmdf_write
@@ -43,8 +52,11 @@ module dmdf
     module procedure dmdf_write_log_2d
   end interface
 
-  !dmdf_attr(val,rank,fprefix,aname)
-  public :: dmdf_attr
+  !dmdf_write_attr(val,rank,fprefix,aname)
+  public :: dmdf_write_attr
+
+  !dmdf_read_attr(val,rank,fprefix,aname)
+  public :: dmdf_read_attr
 
   !dmdf_write(dat,rank,fprefix,vname       ,first,last)
   !dmdf_write(dat,rank,fprefix,vname,dnames,first,last)
@@ -56,12 +68,105 @@ contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  !! GLOBAL ATTRIBUTE ROUTINES
+  !! GLOBAL ATTRIBUTE READ ROUTINES
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-  subroutine dmdf_attr_real4(val,rank,fprefix,aname)
+  subroutine dmdf_read_attr_real4(val,rank,fprefix,aname)
+    implicit none
+    real(4)         , intent(  out) :: val
+    integer         , intent(in   ) :: rank
+    character(len=*), intent(in   ) :: fprefix
+    character(len=*), intent(in   ) :: aname
+    integer :: ierr
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    _NCERR( nf90_get_att(ncid,NF90_GLOBAL,trim(aname),val) )
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_read_attr_real4
+
+
+  subroutine dmdf_read_attr_real8(val,rank,fprefix,aname)
+    implicit none
+    real(8)         , intent(  out) :: val
+    integer         , intent(in   ) :: rank
+    character(len=*), intent(in   ) :: fprefix
+    character(len=*), intent(in   ) :: aname
+    integer :: ierr
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    _NCERR( nf90_get_att(ncid,NF90_GLOBAL,trim(aname),val) )
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_read_attr_real8
+
+
+  subroutine dmdf_read_attr_int4(val,rank,fprefix,aname)
+    implicit none
+    integer(4)      , intent(  out) :: val
+    integer         , intent(in   ) :: rank
+    character(len=*), intent(in   ) :: fprefix
+    character(len=*), intent(in   ) :: aname
+    integer :: ierr
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    _NCERR( nf90_get_att(ncid,NF90_GLOBAL,trim(aname),val) )
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_read_attr_int4
+
+
+  subroutine dmdf_read_attr_int8(val,rank,fprefix,aname)
+    implicit none
+    integer(8)      , intent(  out) :: val
+    integer         , intent(in   ) :: rank
+    character(len=*), intent(in   ) :: fprefix
+    character(len=*), intent(in   ) :: aname
+    integer :: ierr
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    _NCERR( nf90_get_att(ncid,NF90_GLOBAL,trim(aname),val) )
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_read_attr_int8
+
+
+  subroutine dmdf_read_attr_char(val,rank,fprefix,aname)
+    implicit none
+    character(len=*), intent(  out) :: val
+    integer         , intent(in   ) :: rank
+    character(len=*), intent(in   ) :: fprefix
+    character(len=*), intent(in   ) :: aname
+    integer :: ierr
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    _NCERR( nf90_get_att(ncid,NF90_GLOBAL,trim(aname),val) )
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_read_attr_char
+
+
+  subroutine dmdf_read_attr_log(val,rank,fprefix,aname)
+    implicit none
+    logical         , intent(  out) :: val
+    integer         , intent(in   ) :: rank
+    character(len=*), intent(in   ) :: fprefix
+    character(len=*), intent(in   ) :: aname
+    integer :: ierr, ival
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    _NCERR( nf90_get_att(ncid,NF90_GLOBAL,trim(aname),ival) )
+    val = merge(.true.,.false.,ival==1)
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_read_attr_log
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !! GLOBAL ATTRIBUTE WRITE ROUTINES
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  subroutine dmdf_write_attr_real4(val,rank,fprefix,aname)
     implicit none
     real(4)         , intent(in) :: val
     integer         , intent(in) :: rank
@@ -73,10 +178,10 @@ contains
     ierr = nf90_redef(ncid)
     _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
     call close_file(.true.,ncid)                              ; _RET_IF_ERR
-  endsubroutine dmdf_attr_real4
+  endsubroutine dmdf_write_attr_real4
 
 
-  subroutine dmdf_attr_real8(val,rank,fprefix,aname)
+  subroutine dmdf_write_attr_real8(val,rank,fprefix,aname)
     implicit none
     real(8)         , intent(in) :: val
     integer         , intent(in) :: rank
@@ -88,10 +193,10 @@ contains
     ierr = nf90_redef(ncid)
     _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
     call close_file(.true.,ncid)                              ; _RET_IF_ERR
-  endsubroutine dmdf_attr_real8
+  endsubroutine dmdf_write_attr_real8
 
 
-  subroutine dmdf_attr_int4(val,rank,fprefix,aname)
+  subroutine dmdf_write_attr_int4(val,rank,fprefix,aname)
     implicit none
     integer(4)      , intent(in) :: val
     integer         , intent(in) :: rank
@@ -103,10 +208,10 @@ contains
     ierr = nf90_redef(ncid)
     _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
     call close_file(.true.,ncid)                              ; _RET_IF_ERR
-  endsubroutine dmdf_attr_int4
+  endsubroutine dmdf_write_attr_int4
 
 
-  subroutine dmdf_attr_int8(val,rank,fprefix,aname)
+  subroutine dmdf_write_attr_int8(val,rank,fprefix,aname)
     implicit none
     integer(8)      , intent(in) :: val
     integer         , intent(in) :: rank
@@ -118,10 +223,10 @@ contains
     ierr = nf90_redef(ncid)
     _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
     call close_file(.true.,ncid)                              ; _RET_IF_ERR
-  endsubroutine dmdf_attr_int8
+  endsubroutine dmdf_write_attr_int8
 
 
-  subroutine dmdf_attr_char(val,rank,fprefix,aname)
+  subroutine dmdf_write_attr_char(val,rank,fprefix,aname)
     implicit none
     character(len=*), intent(in) :: val
     integer         , intent(in) :: rank
@@ -133,10 +238,10 @@ contains
     ierr = nf90_redef(ncid)
     _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
     call close_file(.true.,ncid)                              ; _RET_IF_ERR
-  endsubroutine dmdf_attr_char
+  endsubroutine dmdf_write_attr_char
 
 
-  subroutine dmdf_attr_log(val,rank,fprefix,aname)
+  subroutine dmdf_write_attr_log(val,rank,fprefix,aname)
     implicit none
     logical         , intent(in) :: val
     integer         , intent(in) :: rank
@@ -148,12 +253,12 @@ contains
     ierr = nf90_redef(ncid)
     _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),merge(1,0,val)) )
     call close_file(.true.,ncid)                              ; _RET_IF_ERR
-  endsubroutine dmdf_attr_log
+  endsubroutine dmdf_write_attr_log
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  !! SCALAR VARIABLE ROUTINES
+  !! SCALAR WRITE ROUTINES
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -280,7 +385,7 @@ contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  !! ARRAY VARIABLE ROUTINES
+  !! ARRAY WRITE ROUTINES
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

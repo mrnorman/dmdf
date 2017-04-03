@@ -19,20 +19,21 @@ program test_dmdf
   integer(8) :: int8_2d(15,14)
   logical    :: log_1d(15)
   logical    :: log_2d(15,14)
+  character(len=128) :: str
 
   call mpi_init(ierr)
   call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
 
-  write(*,*) 'attributes'
+  write(*,*) 'Write attributes'
 
-  call dmdf_attr (real4                   ,rank,'testing','att_real4') ; if (.not. success) write(*,*) error_string
-  call dmdf_attr (real8                   ,rank,'testing','att_real8') ; if (.not. success) write(*,*) error_string
-  call dmdf_attr (int4                    ,rank,'testing','att_int4' ) ; if (.not. success) write(*,*) error_string
-  call dmdf_attr (int8                    ,rank,'testing','att_int8' ) ; if (.not. success) write(*,*) error_string
-  call dmdf_attr ('my character attribute',rank,'testing','att_char' ) ; if (.not. success) write(*,*) error_string
-  call dmdf_attr (log                     ,rank,'testing','att_log'  ) ; if (.not. success) write(*,*) error_string
+  call dmdf_write_attr(real4                   ,rank,'testing','att_real4') ; if (.not. success) write(*,*) error_string
+  call dmdf_write_attr(real8                   ,rank,'testing','att_real8') ; if (.not. success) write(*,*) error_string
+  call dmdf_write_attr(int4                    ,rank,'testing','att_int4' ) ; if (.not. success) write(*,*) error_string
+  call dmdf_write_attr(int8                    ,rank,'testing','att_int8' ) ; if (.not. success) write(*,*) error_string
+  call dmdf_write_attr('my character attribute',rank,'testing','att_char' ) ; if (.not. success) write(*,*) error_string
+  call dmdf_write_attr(log                     ,rank,'testing','att_log'  ) ; if (.not. success) write(*,*) error_string
 
-  write(*,*) 'beginning first transfer'
+  write(*,*) 'Beginning first write'
 
   real4_1d = 0.
   real8_1d = 1.
@@ -60,7 +61,7 @@ program test_dmdf
   call dmdf_write(int8_2d ,rank,'testing','int8_2d' ,(/'x1','x2'/),.false.,.false.) ; if (.not. success) write(*,*) error_string
   call dmdf_write(log_2d  ,rank,'testing','log_2d'  ,(/'x1','x2'/),.false.,.true. ) ; if (.not. success) write(*,*) error_string
 
-  write(*,*) 'beginning second transfer'
+  write(*,*) 'Beginning second write'
 
   real4_1d = 10.
   real8_1d = 11.
@@ -88,7 +89,22 @@ program test_dmdf
   call dmdf_write(int8_2d ,rank,'testing','int8_2d' ,(/'x1','x2'/),.false.,.false.) ; if (.not. success) write(*,*) error_string
   call dmdf_write(log_2d  ,rank,'testing','log_2d'  ,(/'x1','x2'/),.false.,.true. ) ; if (.not. success) write(*,*) error_string
 
-  write(*,*) 'finished'
+  write(*,*) 'Read attributes'
+
+  call dmdf_read_attr(real4,rank,'testing','att_real4') ; if (.not. success) write(*,*) error_string
+  call dmdf_read_attr(real8,rank,'testing','att_real8') ; if (.not. success) write(*,*) error_string
+  call dmdf_read_attr(int4 ,rank,'testing','att_int4' ) ; if (.not. success) write(*,*) error_string
+  call dmdf_read_attr(int8 ,rank,'testing','att_int8' ) ; if (.not. success) write(*,*) error_string
+  call dmdf_read_attr(str  ,rank,'testing','att_char' ) ; if (.not. success) write(*,*) error_string
+  call dmdf_read_attr(log  ,rank,'testing','att_log'  ) ; if (.not. success) write(*,*) error_string
+  write(*,*) real4
+  write(*,*) real8
+  write(*,*) int4
+  write(*,*) int8
+  write(*,*) trim(str)
+  write(*,*) log
+
+  write(*,*) 'Finished'
 
   call mpi_finalize(ierr)
 
