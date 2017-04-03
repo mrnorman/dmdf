@@ -20,6 +20,7 @@ module dmdf
     module procedure dmdf_attr_int4
     module procedure dmdf_attr_int8
     module procedure dmdf_attr_char
+    module procedure dmdf_attr_log
   end interface
   
   interface dmdf_write
@@ -27,16 +28,19 @@ module dmdf
     module procedure dmdf_write_real8_scalar
     module procedure dmdf_write_int4_scalar
     module procedure dmdf_write_int8_scalar
+    module procedure dmdf_write_log_scalar
 
     module procedure dmdf_write_real4_1d
     module procedure dmdf_write_real8_1d
     module procedure dmdf_write_int4_1d
     module procedure dmdf_write_int8_1d
+    module procedure dmdf_write_log_1d
 
     module procedure dmdf_write_real4_2d
     module procedure dmdf_write_real8_2d
     module procedure dmdf_write_int4_2d
     module procedure dmdf_write_int8_2d
+    module procedure dmdf_write_log_2d
   end interface
 
   !dmdf_attr(val,rank,fprefix,aname)
@@ -130,6 +134,21 @@ contains
     _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),val) )
     call close_file(.true.,ncid)                              ; _RET_IF_ERR
   endsubroutine dmdf_attr_char
+
+
+  subroutine dmdf_attr_log(val,rank,fprefix,aname)
+    implicit none
+    logical         , intent(in) :: val
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: aname
+    integer :: ierr
+    success = .true.
+    call procure_fileid(.true.,rank,fprefix,ncid)             ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    _NCERR( nf90_put_att(ncid,NF90_GLOBAL,trim(aname),merge(1,0,val)) )
+    call close_file(.true.,ncid)                              ; _RET_IF_ERR
+  endsubroutine dmdf_attr_log
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -233,6 +252,30 @@ contains
     _NCERR( nf90_put_var(ncid,varid,(/dat/),start,count) )
     call close_file(last,ncid)                                           ; _RET_IF_ERR
   end subroutine dmdf_write_int8_scalar
+
+
+  subroutine dmdf_write_log_scalar(dat,rank,fprefix,vname,first,last)
+    implicit none
+    integer, parameter :: ndims = 1
+    logical         , intent(in) :: dat
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimid_unlim(ndims,ncid,dimids,unlim_len)                ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_INT,varid)           ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,(/merge(1,0,dat)/),start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_log_scalar
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -346,6 +389,32 @@ contains
   end subroutine dmdf_write_int8_1d
 
 
+  subroutine dmdf_write_log_1d(dat,rank,fprefix,vname,dnames,first,last)
+    implicit none
+    integer, parameter :: ndims = 2
+    logical         , intent(in) :: dat(:)
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    character(len=*), intent(in) :: dnames(ndims-1)
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(1:ndims-1) = shape(dat)
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimids(ndims,ncid,dnames,dsizes,dimids,unlim_len)       ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_INT,varid)           ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,merge(1,0,dat),start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_log_1d
+
+
   subroutine dmdf_write_real4_2d(dat,rank,fprefix,vname,dnames,first,last)
     implicit none
     integer, parameter :: ndims = 3
@@ -448,6 +517,32 @@ contains
     _NCERR( nf90_put_var(ncid,varid,dat,start,count) )
     call close_file(last,ncid)                                           ; _RET_IF_ERR
   end subroutine dmdf_write_int8_2d
+
+
+  subroutine dmdf_write_log_2d(dat,rank,fprefix,vname,dnames,first,last)
+    implicit none
+    integer, parameter :: ndims = 3
+    logical         , intent(in) :: dat(:,:)
+    integer         , intent(in) :: rank
+    character(len=*), intent(in) :: fprefix
+    character(len=*), intent(in) :: vname
+    character(len=*), intent(in) :: dnames(ndims-1)
+    logical         , intent(in) :: first
+    logical         , intent(in) :: last
+    integer :: dimids(ndims), start(ndims), count(ndims), dsizes(ndims)
+    integer :: varid, unlim_len, ierr
+    success = .true.
+    dsizes(1:ndims-1) = shape(dat)
+    dsizes(ndims) = NF90_UNLIMITED
+    call procure_fileid(first,rank,fprefix,ncid)                         ; _RET_IF_ERR
+    ierr = nf90_redef(ncid)
+    call procure_dimids(ndims,ncid,dnames,dsizes,dimids,unlim_len)       ; _RET_IF_ERR
+    call procure_varid(ndims,ncid,vname,dimids,NF90_INT,varid)           ; _RET_IF_ERR
+    call compute_start_count(first,ndims,dsizes,unlim_len,start,count)   ; _RET_IF_ERR
+    ierr = nf90_enddef(ncid)
+    _NCERR( nf90_put_var(ncid,varid,merge(1,0,dat),start,count) )
+    call close_file(last,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_write_log_2d
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
