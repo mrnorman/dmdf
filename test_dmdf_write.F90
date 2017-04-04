@@ -89,21 +89,6 @@ program test_dmdf
   call dmdf_write(int8_2d ,rank,'testing','int8_2d' ,(/'x1','x2'/),.false.,.false.) ; if (.not. success) write(*,*) error_string
   call dmdf_write(log_2d  ,rank,'testing','log_2d'  ,(/'x1','x2'/),.false.,.true. ) ; if (.not. success) write(*,*) error_string
 
-  write(*,*) 'Read attributes'
-
-  call dmdf_read_attr(real4,rank,'testing','att_real4') ; if (.not. success) write(*,*) error_string
-  call dmdf_read_attr(real8,rank,'testing','att_real8') ; if (.not. success) write(*,*) error_string
-  call dmdf_read_attr(int4 ,rank,'testing','att_int4' ) ; if (.not. success) write(*,*) error_string
-  call dmdf_read_attr(int8 ,rank,'testing','att_int8' ) ; if (.not. success) write(*,*) error_string
-  call dmdf_read_attr(str  ,rank,'testing','att_char' ) ; if (.not. success) write(*,*) error_string
-  call dmdf_read_attr(log  ,rank,'testing','att_log'  ) ; if (.not. success) write(*,*) error_string
-  write(*,*) real4
-  write(*,*) real8
-  write(*,*) int4
-  write(*,*) int8
-  write(*,*) trim(str)
-  write(*,*) log
-
   write(*,*) 'Finished'
 
   call mpi_finalize(ierr)
