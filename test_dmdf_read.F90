@@ -24,6 +24,16 @@ program test_dmdf
   integer    :: int4_2d (15,14,4)
   integer(8) :: int8_2d (15,14,4)
   logical    :: log_2d  (15,14,4)
+  real       :: real4_3d(15,14,3,4)
+  real(8)    :: real8_3d(15,14,3,4)
+  integer    :: int4_3d (15,14,3,4)
+  integer(8) :: int8_3d (15,14,3,4)
+  logical    :: log_3d  (15,14,3,4)
+  real       :: real4_4d(15,14,3,2,4)
+  real(8)    :: real8_4d(15,14,3,2,4)
+  integer    :: int4_4d (15,14,3,2,4)
+  integer(8) :: int8_4d (15,14,3,2,4)
+  logical    :: log_4d  (15,14,3,2,4)
 
   write(*,*) 'Read attributes'
 
@@ -75,6 +85,30 @@ program test_dmdf
   write(*,*) int4_2d 
   write(*,*) int8_2d 
   write(*,*) log_2d  
+
+  write(*,*) 'Read 3d'
+  call dmdf_read(real4_3d,'testing','real4_3d',1,4,.true. ,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_read(real8_3d,'testing','real8_3d',1,4,.false.,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_read(int4_3d ,'testing','int4_3d' ,1,4,.false.,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_read(int8_3d ,'testing','int8_3d' ,1,4,.false.,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_read(log_3d  ,'testing','log_3d'  ,1,4,.false.,.true. ) ; if (.not. success) write(*,*) error_string
+  write(*,*) real4_3d
+  write(*,*) real8_3d
+  write(*,*) int4_3d 
+  write(*,*) int8_3d 
+  write(*,*) log_3d  
+
+  write(*,*) 'Read 4d'
+  call dmdf_read(real4_4d,'testing','real4_4d',1,4,.true. ,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_read(real8_4d,'testing','real8_4d',1,4,.false.,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_read(int4_4d ,'testing','int4_4d' ,1,4,.false.,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_read(int8_4d ,'testing','int8_4d' ,1,4,.false.,.false.) ; if (.not. success) write(*,*) error_string
+  call dmdf_read(log_4d  ,'testing','log_4d'  ,1,4,.false.,.true. ) ; if (.not. success) write(*,*) error_string
+  write(*,*) real4_4d
+  write(*,*) real8_4d
+  write(*,*) int4_4d 
+  write(*,*) int8_4d 
+  write(*,*) log_4d  
 
   write(*,*) 'Finished'
 
