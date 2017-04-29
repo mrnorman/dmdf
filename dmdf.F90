@@ -1,4 +1,63 @@
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! Dumpy McDump Face (DMDF)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! A convenience tool for dumping data to NetCDF files and reading it.
+!! - The tool assumes you'll dump records of data, and every dmdf_write()
+!!   routine except the attribute routines automatically appends an
+!!   unlimited dimension to the end of the dimension list.
+!! - Currently (and probably permenantly) you have to write one file per
+!!   MPI task. It's not ideal, but coordinating the same file among multiple
+!!   tasks when you don't know who's going to write data when is does not
+!!   appear to be something NetCDF was designed to do.
+!!   - This should be ameliorated by the fact that at scale, we'll always
+!!     be sampling a small proportion of a random uniform distribution to
+!!     determine when to write data. Thus, there shouldn't be a massive
+!!     number of writes at the same time at least.
+!! - There is "logical" data type functionality, which is not natively
+!!   supported by NetCDF. I hack it by storing to and from an integer type.
+!!   Obviously, once written, there's no way to know whether it was supposed
+!!   to be integer or logical, so the user keeps up with that.
+!! - There is the ability to keep a file open for multiple writes at a time
+!!   since in most cases, the inputs and outputs for a routine involve more
+!!   than a single piece of data.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! PUBLIC INTERFACES:
+!!
+!!   dmdf_write_attr(val,rank,fprefix,aname)
+!!   dmdf_read_attr(val,fprefix,aname)
+!!   dmdf_write(dat,rank,fprefix,vname       ,first,last) !For scalar values
+!!   dmdf_write(dat,rank,fprefix,vname,dnames,first,last) !For array values
+!!   dmdf_read(dat,fprefix,vname,ind1,ind2,first,last)
+!!
+!! PARAMETERS:
+!! - first == .true. means open the file
+!! - last  == .true. means close the file
+!! - dnames are the dimension names in a FORTRAN (/array/)
+!! - vname is the variable name
+!! - aname is the attribute name
+!! - rank is an arbitrary integer ID (which is usually MPI rank)
+!! - val and dat are the data
+!! - fprefix is the previx of the filename, which becomes: prefix_rank.nc
+!!   - The file names use preprended zeros when printing the rank.
+!! - ind1 and ind2 are the bounds in terms of the unlimited dimension (i.e.,
+!!   (ind2-ind1+1) is the total number of samples being read in.
+!!
+!! NOTES:
+!! - All arrays are assumed shape arrays, the dimensions of which are
+!!   gathered by shape()
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! Typical workflow:
+!! - Dump data to file using write routines (one file per MPI rank)
+!! - Combine files with 'ncrcat prefix_*.nc prefix.nc' (NCO tool)
+!! - Read from the concatenated file
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! Known issues:
+!! - You cannot define a variable and then use a dimension by the same name
+!! - You need to know how many records to read ahead of time for now
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 #define _NCERR(x) if ((x) /= NF90_NOERR) then; write(error_string,fmt='(A)') nf90_strerror(x); success = .false.; return; endif
 #define _ERR(x) write(error_string,fmt='(A)') x; success = .false.; return
 #define _RET_IF_ERR if (.not. success) return
@@ -106,7 +165,7 @@ module dmdf
   !dmdf_write(dat,rank,fprefix,vname,dnames,first,last)   !For array values
   public :: dmdf_write
 
-  !dmdf_read_real4_scalar(dat,fprefix,vname,ind1,ind2,first,last)
+  !dmdf_read_real4(dat,fprefix,vname,ind1,ind2,first,last)
   public :: dmdf_read
 
 
