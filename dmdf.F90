@@ -199,8 +199,24 @@ module dmdf
   !dmdf_read(dat,fprefix,vname,ind      ,first,last) !For a single index
   public :: dmdf_read
 
+  !dmdf_num_records(fprefix,num_records) !For a single index
+  public :: dmdf_num_records
+
 
 contains
+
+
+  subroutine dmdf_num_records(fprefix,num_records)
+    implicit none
+    character(len=*), intent(in   ) :: fprefix
+    integer         , intent(  out) :: num_records
+    integer :: ierr, dimid
+    success = .true.
+    call procure_fileid(.true.,-1,fprefix,ncid)                            ; _RET_IF_ERR
+    _NCERR( nf90_inq_dimid( ncid , 'unlim', dimid ) )
+    _NCERR( nf90_inquire_dimension( ncid , dimid , len=num_records ) )
+    call close_file(.true.,ncid)                                           ; _RET_IF_ERR
+  end subroutine dmdf_num_records
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2287,7 +2303,7 @@ contains
     character(len=256) :: fname
     if (first) then
       if (rank == -1) then
-        write(fname,fmt='(A,A)') trim(fprefix) , '.nc'
+        write(fname,fmt='(A,A)') trim(fprefix)
       else
         write(fname,fmt='(A,A,I0.6,A)') trim(fprefix) , '_' , rank , '.nc'
       endif
